@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ágora Socrática — O Dilema de Eutífron (Projetor)</title>
+  <!-- Paho MQTT client para sincronização em tempo real global gratuita via WebSockets -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #0a0e17;
+      --bg-card: #131b2e;
+      --border: #263352;
+      --gold: #f59e0b;
+      --gold-light: #fbbf24;
+      --gold-dark: #b45309;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --voluntarismo: #ec4899;
+      --realismo: #3b82f6;
+      --relativismo: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header nobre estilo clássico */
+    header {
+      background: linear-gradient(180deg, rgba(19, 27, 46, 0.95) 0%, rgba(10, 14, 23, 0.8) 100%);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .greek-pillar {
+      font-size: 32px;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .title-box h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-box h1 span {
+      color: var(--gold);
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+    }
+
+    .title-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .counter-badge {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .counter-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--gold);
+      animation: pulse 2s infinite;
+    }
+
+    .cloud-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--emerald);
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Banner da Pergunta Socrática */
+    .dilemma-banner {
+      background: linear-gradient(135deg, rgba(26, 35, 58, 0.8), rgba(19, 27, 46, 0.95));
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+    }
+
+    .dilemma-quote {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      font-style: italic;
+      color: var(--gold-light);
+      max-width: 1100px;
+      margin: 0 auto 8px auto;
+      line-height: 1.4;
+    }
+
+    .dilemma-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* Layout Principal em 2 Colunas */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 28px;
+      padding: 28px 40px;
+      flex: 1;
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qr-wrapper {
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 12px auto;
+      width: 200px;
+      height: 200px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .qr-wrapper img {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    .qr-instruction {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .qr-instruction strong {
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    /* Gráfico de Barras das Teses */
+    .stats-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stat-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .bar-bg {
+      background: rgba(255, 255, 255, 0.08);
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 5px;
+    }
+
+    .bar-fill.voluntarismo { background: var(--voluntarismo); }
+    .bar-fill.realismo { background: var(--realismo); }
+    .bar-fill.relativismo { background: var(--relativismo); }
+
+    /* Coluna Direita: Mural ao Vivo */
+    .mural-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mural-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .mural-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 16px;
+      overflow-y: auto;
+      max-height: calc(100vh - 380px);
+      padding-right: 6px;
+    }
+
+    .mural-grid::-webkit-scrollbar { width: 6px; }
+    .mural-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .thesis-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: slideUp 0.4s ease forwards;
+      border-left: 4px solid var(--border);
+    }
+
+    .thesis-card.voluntarismo { border-left-color: var(--voluntarismo); }
+    .thesis-card.realismo { border-left-color: var(--realismo); }
+    .thesis-card.relativismo { border-left-color: var(--relativismo); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .thesis-author {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .thesis-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .thesis-badge.voluntarismo { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .thesis-badge.realismo { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .thesis-badge.relativismo { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+    .thesis-text {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      font-style: italic;
+    }
+
+    .thesis-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      align-self: flex-end;
+    }
+
+    /* Barra de Ação Inferior */
+    .socratic-action-bar {
+      padding: 18px 40px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-elenchos {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #0a0e17;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+    }
+
+    .btn-elenchos:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-reset:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    /* Modal da Aporia Socrática */
+    .aporia-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 40px;
+    }
+
+    .aporia-content {
+      background: var(--bg-card);
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      max-width: 900px;
+      width: 100%;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      animation: modalScale 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes modalScale {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .aporia-header {
+      font-family: Georgia, serif;
+      font-size: 28px;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .aporia-body {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .aporia-body blockquote {
+      border-left: 4px solid var(--gold);
+      padding-left: 18px;
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .aporia-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 26px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header>
+    <div class="brand">
+      <div class="greek-pillar">🏛️</div>
+      <div class="title-box">
+        <h1>ÁGORA SOCRÁTICA <span>&middot; Euthyphro 10a</span></h1>
+        <p>FACULDADE DE FILOSOFIA &middot; METAÉTICA E A FUNDAMENTAÇÃO DO BEM</p>
+      </div>
+    </div>
+    <div class="status-group">
+      <div class="cloud-badge" id="cloudStatusBadge">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;" id="cloudDot"></span>
+        <span id="cloudStatusText">Nuvem Conectada</span>
+      </div>
+      <div class="counter-badge">
+        <div class="counter-dot"></div>
+        <span id="studentCount">0</span> Alunos Conectados
+      </div>
+    </div>
+  </header>
+
+  <!-- O Dilema Central -->
+  <div class="dilemma-banner">
+    <div class="dilemma-quote">
+      &ldquo;O piedoso &eacute; amado pelos deuses porque &eacute; piedoso, ou &eacute; piedoso porque &eacute; amado pelos deuses?&rdquo;
+    </div>
+    <div class="dilemma-sub">
+      Sócrates a Eutífron &mdash; Como fundamentar o Bem sem cair no capricho do poder nem no mistério ontológico?
+    </div>
+  </div>
+
+  <!-- Layout Grid -->
+  <div class="grid-container">
+
+    <!-- Lado Esquerdo: Acesso & Estatísticas -->
+    <div class="left-col">
+      
+      <!-- Card QR Code -->
+      <div class="card">
+        <div class="card-title">📱 PARTICIPE PELO CELULAR</div>
+        <div class="qr-wrapper" id="qrContainer">
+          <!-- QR Code escaneável de alta resolução gerado para seu GitHub Pages -->
+          <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Falexmachadotecnico-cmyk.github.io%2Fsocrates%2Fcelular_socrates.html" alt="QR Code Ágora Socrática">
+        </div>
+        <div class="qr-instruction">
+          Aponte a câmera ou acesse:<br>
+          <strong id="directUrl">alexmachadotecnico-cmyk.github.io/socrates/celular_socrates.html</strong>
+        </div>
+      </div>
+
+      <!-- Card Distribuição das Teses -->
+      <div class="card">
+        <div class="card-title">📊 DISTRIBUIÇÃO DAS TESES</div>
+        <div class="stats-bars">
+          
+          <div class="stat-item">
+            <div class="stat-label-row">
+              <span style="color: var(--voluntarismo);">Voluntarismo (Vontade/Poder)</span>
+              <span id="percVoluntarismo">0% (0)</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill voluntarismo" id="barVoluntarismo"></div>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label-row">
+              <span style="color: var(--realismo);">Realismo Moral (Bem em Si)</span>
+              <span id="percRealismo">0% (0)</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill realismo" id="barRealismo"></div>
+            </div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-label-row">
+              <span style="color: var(--relativismo);">Relativismo / Ceticismo</span>
+              <span id="percRelativismo">0% (0)</span>
+            </div>
+            <div class="bar-bg">
+              <div class="bar-fill relativismo" id="barRelativismo"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Lado Direita: Mural de Teses em Tempo Real -->
+    <div class="mural-col">
+      <div class="mural-header">
+        <div class="card-title" style="margin: 0;">📜 TESES SUBMETIDAS PELOS ESTUDANTES</div>
+        <span style="font-size: 12px; color: var(--text-muted);" id="muralStatus">Aguardando envios via smartphone...</span>
+      </div>
+
+      <div class="mural-grid" id="muralGrid">
+        <!-- Cards inseridos dinamicamente -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Barra de Ação Inferior (Intervenção de Sócrates) -->
+  <div class="socratic-action-bar">
+    <button class="btn-reset" onclick="resetSession()">Limpar Sessão</button>
+    <div style="font-size: 13px; color: var(--text-muted);">
+      Sincronização global ativa via WebSockets &bull; Tópico: <code>alexmachado_agora_socrates</code>
+    </div>
+    <button class="btn-elenchos" onclick="openAporiaModal()">
+      <span>🏛️</span> Ativar o Elenchos Socrático
+    </button>
+  </div>
+
+  <!-- Modal do Elenchos / Aporia -->
+  <div class="aporia-modal" id="aporiaModal">
+    <div class="aporia-content">
+      <button class="aporia-close" onclick="closeAporiaModal()">&times;</button>
+      <div class="aporia-header">
+        <span>🏺</span> A Refutação Socrática: O Impasse de Eutífron
+      </div>
+      <div class="aporia-body" id="aporiaDynamicText">
+        <p>Observando as teses defendidas por nossa assembleia, Sócrates aproxima-se e indaga:</p>
+        
+        <blockquote>
+          &ldquo;Meus caros amigos, se vocês afirmam que o bem é bom porque a autoridade o ama, tornam a moral refém da arbitrariedade do poder. Se afirmam que a autoridade o ama porque ele é bom, admitem que o Bem é independente dos próprios deuses &mdash; mas continuam sem saber explicar o que é o Bem em sua essência!&rdquo;
+        </blockquote>
+
+        <p>
+          Vocês me disseram o que <em>acontece</em> com a justiça (ela é amada, ou é obedecida), mas <strong>ainda não me disseram o que a justiça É</strong>.
+        </p>
+
+        <p style="font-weight: 700; color: var(--gold-light);">
+          Chegamos à Aporia: o reconhecimento da própria ignorância como o verdadeiro início da sabedoria.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MQTT_TOPIC = "alexmachado_cmyk_agora_socrates_2026/teses";
+    const channel = new BroadcastChannel('agora_socrates_live');
+    let submissions = [];
+
+    // 1. Carrega teses salvas localmente
+    function loadSaved() {
+      const saved = localStorage.getItem('agora_submissions');
+      if (saved) {
+        submissions = JSON.parse(saved);
+        renderMural();
+        updateStats();
+      }
+    }
+
+    // 2. Conexão MQTT em Nuvem (HiveMQ Free Public WebSocket Broker)
+    function connectMqtt() {
+      if (typeof Paho === 'undefined') {
+        console.warn('Paho MQTT não carregado. Operando em modo BroadcastChannel local.');
+        return;
+      }
+
+      const clientId = "telao_" + Math.random().toString(16).substring(2, 10);
+      const client = new Paho.MQTT.Client("broker.hivemq.com", Number(8884), "/mqtt", clientId);
+
+      client.onConnectionLost = function (responseObject) {
+        if (responseObject.errorCode !== 0) {
+          console.warn("Conexão MQTT perdida, reconectando...", responseObject.errorMessage);
+          document.getElementById('cloudStatusText').textContent = "Reconectando Nuvem...";
+          document.getElementById('cloudDot').style.background = "#f59e0b";
+          setTimeout(connectMqtt, 3000);
+        }
+      };
+
+      client.onMessageArrived = function (message) {
+        try {
+          const payload = JSON.parse(message.payloadString);
+          handleNewSubmission(payload);
+        } catch (e) {
+          console.error("Erro ao processar mensagem MQTT:", e);
+        }
+      };
+
+      client.connect({
+        useSSL: true,
+        timeout: 5,
+        onSuccess: function () {
+          console.log("Conectado com sucesso ao broker de nuvem HiveMQ!");
+          document.getElementById('cloudStatusText').textContent = "Nuvem Global Conectada";
+          document.getElementById('cloudDot').style.background = "#10b981";
+          client.subscribe(MQTT_TOPIC);
+        },
+        onFailure: function (e) {
+          console.warn("Falha ao conectar no broker MQTT:", e);
+          document.getElementById('cloudStatusText').textContent = "Modo Local (Offline)";
+          document.getElementById('cloudDot').style.background = "#3b82f6";
+        }
+      });
+    }
+
+    // 3. Suporte a BroadcastChannel e StorageEvent local
+    channel.onmessage = (event) => {
+      if (event.data && event.data.type === 'NEW_THESIS') {
+        handleNewSubmission(event.data.payload);
+      }
+    };
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'agora_submissions_trigger') {
+        loadSaved();
+      }
+    });
+
+    function handleNewSubmission(item) {
+      // Evita duplicatas se receber pelo MQTT e local ao mesmo tempo
+      const exists = submissions.some(s => s.id === item.id || (s.nome === item.nome && s.argumento === item.argumento && s.hora === item.hora));
+      if (exists) return;
+
+      submissions.unshift(item);
+      localStorage.setItem('agora_submissions', JSON.stringify(submissions));
+      renderMural();
+      updateStats();
+    }
+
+    function renderMural() {
+      const grid = document.getElementById('muralGrid');
+      grid.innerHTML = '';
+
+      if (submissions.length === 0) {
+        document.getElementById('muralStatus').textContent = 'Aguardando envios via smartphone...';
+        return;
+      }
+
+      document.getElementById('muralStatus').textContent = `${submissions.length} contribuição(ões) recebida(s)`;
+
+      submissions.forEach(sub => {
+        const card = document.createElement('div');
+        card.className = `thesis-card ${sub.corrente}`;
+
+        let labelCorrente = 'Voluntarismo';
+        if (sub.corrente === 'realismo') labelCorrente = 'Realismo Moral';
+        if (sub.corrente === 'relativismo') labelCorrente = 'Relativismo';
+
+        card.innerHTML = `
+          <div class="thesis-author">
+            <span>👤 ${escapeHtml(sub.nome)}</span>
+            <span class="thesis-badge ${sub.corrente}">${labelCorrente}</span>
+          </div>
+          <div class="thesis-text">&ldquo;${escapeHtml(sub.argumento)}&rdquo;</div>
+          <div class="thesis-time">${sub.hora || 'Agora'}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function updateStats() {
+      const total = submissions.length;
+      document.getElementById('studentCount').textContent = total;
+
+      const countVol = submissions.filter(s => s.corrente === 'voluntarismo').length;
+      const countReal = submissions.filter(s => s.corrente === 'realismo').length;
+      const countRel = submissions.filter(s => s.corrente === 'relativismo').length;
+
+      const pVol = total ? Math.round((countVol / total) * 100) : 0;
+      const pReal = total ? Math.round((countReal / total) * 100) : 0;
+      const pRel = total ? Math.round((countRel / total) * 100) : 0;
+
+      document.getElementById('percVoluntarismo').textContent = `${pVol}% (${countVol})`;
+      document.getElementById('barVoluntarismo').style.width = `${pVol}%`;
+
+      document.getElementById('percRealismo').textContent = `${pReal}% (${countReal})`;
+      document.getElementById('barRealismo').style.width = `${pReal}%`;
+
+      document.getElementById('percRelativismo').textContent = `${pRel}% (${countRel})`;
+      document.getElementById('barRelativismo').style.width = `${pRel}%`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function resetSession() {
+      if (confirm('Deseja zerar todas as teses da sessão atual?')) {
+        submissions = [];
+        localStorage.removeItem('agora_submissions');
+        localStorage.setItem('agora_submissions_trigger', Date.now());
+        renderMural();
+        updateStats();
+      }
+    }
+
+    function openAporiaModal() {
+      document.getElementById('aporiaModal').style.display = 'flex';
+    }
+
+    function closeAporiaModal() {
+      document.getElementById('aporiaModal').style.display = 'none';
+    }
+
+    function updateMobileLink() {
+      let base = window.location.href.split('?')[0].split('#')[0];
+      let mobileUrl;
+      if (base.includes('.html')) {
+        mobileUrl = base.substring(0, base.lastIndexOf('/')) + '/celular_socrates.html';
+      } else {
+        mobileUrl = base.replace(/\/+$/, '') + '/celular_socrates.html';
+      }
+      
+      if (mobileUrl.startsWith('file:') || mobileUrl.includes('localhost')) {
+        mobileUrl = 'https://alexmachadotecnico-cmyk.github.io/socrates/celular_socrates.html';
+      }
+
+      const cleanDisplay = mobileUrl.replace(/^https?:\/\//, '');
+      const directEl = document.getElementById('directUrl');
+      if (directEl) directEl.textContent = cleanDisplay;
+      
+      const qrEl = document.getElementById('qrImg');
+      if (qrEl) {
+        qrEl.src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(mobileUrl);
+      }
+    }
+
+    window.onload = () => {
+      updateMobileLink();
+      loadSaved();
+      connectMqtt();
+    };
+  </script>
+</body>
+</html>
