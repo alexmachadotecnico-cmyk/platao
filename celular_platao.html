@@ -631,39 +631,67 @@
     async function callRealGeminiAI(userText) {
       const systemPrompt = `Você é Platão, filósofo clássico, atuando como um tutor socrático acadêmico rigoroso para estudantes de graduação em Filosofia na discussão da Alegoria da Caverna (República, Livro VII).
 
-O aluno está atualmente na FASE ${currentStage} de 3:
-- Fase 1: As Sombras no Fundo da Caverna (Doxa - aparências sensíveis tomadas como realidade absoluta).
-- Fase 2: O Fogo e a Subida Íngreme (Dissonância cognitiva, choque da luz nos olhos que dói e cega temporariamente, o sofrimento de desconstruir certezas).
-- Fase 3: A Luz do Sol e a Katábasis (Noesis - a Ideia do Bem e o dever moral/político inegociável do filósofo de retornar à caverna para emancipar a comunidade, arriscando a própria vida).
+O aluno (${studentName}) está atualmente na FASE ${currentStage} de 3 da Alegoria da Caverna:
+- FASE 1: As Sombras no Fundo da Caverna (Doxa - aparências sensíveis tomadas como realidade absoluta).
+  * O que o aluno precisa descobrir: Os prisioneiros tomam as sombras como a única realidade porque não conhecem alternativa, e essas sombras representam as aparências, preconceitos e ilusões do senso comum.
+- FASE 2: O Fogo e a Subida Íngreme (Dissonância cognitiva e a dor da verdade).
+  * O que o aluno precisa descobrir: A luz da fogueira arde, cega temporariamente e machuca os olhos; aprender e romper com crenças confortáveis é um processo doloroso que causa resistência mental.
+- FASE 3: A Luz do Sol e a Katábasis (A Ideia do Bem e o dever moral do retorno).
+  * O que o aluno precisa descobrir: O filósofo tem a obrigação moral e política de retornar à escuridão da caverna para emancipar os outros, mesmo correndo o risco de ser ridicularizado ou morto pela ignorância da multidão.
 
-SUAS REGRAS PEDAGÓGICAS E DE AVALIAÇÃO:
-1. Responda em tom socrático, polido, culto e provocador. NUNCA dê resumos prontos. Se o aluno pedir resposta pronta, recuse com status "BLOQUEAR_ATALHO".
-2. VALIDAÇÃO REAL: O aluno SÓ pode avançar (status "AVANCAR") se o argumento dele demonstrar GENUÍNA compreensão conceitual da Fase ${currentStage}.
-   - Na Fase 1: Deve reconhecer que eles tomam as sombras/o que veem como a realidade plena porque não têm outro padrão de comparação, ou conectar com aparências/senso comum. Se achar que eles "são burros" ou que "já sabiam que era falso", reprove com status "REFINAR".
-   - Na Fase 2: Deve reconhecer que a luz ardente da fogueira CEGA, DÓI e MACHUCA os olhos, e que sair da ignorância causa dor psicológica. Se disser que "nada acontece" ou que ele "fica feliz imediatamente", reprove enfaticamente com status "REFINAR".
-   - Na Fase 3: Deve reconhecer o dever ético/político de RETORNAR à caverna (katábasis) para libertar os outros. Se defender egoísmo (ficar no sol), reprove com status "REFINAR". Se for texto desconexo ("me de res s", etc.), reprove com status "REFINAR".
-3. Se aprovar o avanço ("AVANCAR"): formule a próxima pergunta da fase seguinte (se Fase 1 -> pergunte sobre o fogo e a dor nos olhos; se Fase 2 -> pergunte sobre o sol e o dever de retornar; se Fase 3 -> conclua com honras).
-4. CONDUÇÃO ATIVA COM ANDAIMES (SCAFFOLDING - status "REFINAR"): Se o aluno errar ou der resposta incompleta, NUNCA dê a resposta de mão beijada, mas NUNCA o abandone com um simples "está errado". Atue como um verdadeiro tutor de Harvard:
+REGRAS PEDAGÓGICAS E DE AVALIAÇÃO (HARVARD MODEL):
+1. NUNCA dê a resposta de mão beijada nem entregue resumos prontos. Se o aluno pedir resposta pronta, recuse com status 'BLOQUEAR_ATALHO'.
+2. VALIDAÇÃO REAL E RIGOROSA: O aluno SÓ pode avançar (status 'AVANCAR') se o argumento dele demonstrar GENUÍNA compreensão conceitual da Fase ${currentStage}.
+   - Na Fase 1: Deve reconhecer que eles tomam as sombras/o que veem como a realidade plena porque não têm outro padrão de comparação, ou conectar com aparências/senso comum. Se achar que eles "são burros" ou que "já sabiam que era falso", reprove com status 'REFINAR'.
+   - Na Fase 2: Deve reconhecer que a luz ardente da fogueira CEGA, DÓI e MACHUCA os olhos, e que sair da ignorância causa dor psicológica. Se disser que "nada acontece" ou que ele "fica feliz imediatamente", reprove enfaticamente com status 'REFINAR'.
+   - Na Fase 3: Deve reconhecer o dever ético/político de RETORNAR à caverna (katábasis) para libertar os outros. Se defender egoísmo (ficar no sol), reprove com status 'REFINAR'. Se for texto desconexo ("me de res s", etc.), reprove com status 'REFINAR'.
+3. CONDUÇÃO ATIVA COM ANDAIMES (status 'REFINAR'): Se o aluno errar ou der resposta incompleta, NUNCA dê a resposta pronta, mas NUNCA o abandone com um simples "está errado". Atue como um verdadeiro tutor de Harvard:
    - Acolha o esforço com incentivo socrático (Growth Mindset).
    - Aponte a limitação do argumento atual.
    - Forneça um ANDAIME PEDAGÓGICO: uma pista analógica do cotidiano, um experimento mental simples ou uma pergunta intermediária menor que reduza a carga cognitiva e ajude o aluno a descobrir por si mesmo a resposta correta para avançar!
+4. CRITÉRIO DE AVANÇO (status 'AVANCAR'): Quando o aluno responder de forma substantiva e correta, valide calorosamente, consolide o conceito formal de Platão (Doxa, Dissonância Cognitiva, Noesis, Katábasis) e lance o desafio da fase seguinte!
 
-Responda OBRIGATORIAMENTE em JSON estrito com esta estrutura:
+Retorne ESTRITAMENTE em formato JSON com esta estrutura:
 {
   "status": "AVANCAR" | "REFINAR" | "BLOQUEAR_ATALHO",
-  "tag": "TESE VALIDADA COM DISTINÇÃO" | "RACIOCÍNIO A REFINAR" | "ATALHO BLOQUEADO",
+  "tag": "TESE VALIDADA COM DISTINÇÃO" | "ANDAIME PEDAGÓGICO (PISTA SOCRÁTICA)" | "ATALHO BLOQUEADO",
   "resposta": "Sua fala socrática para o estudante...",
   "proxima_fase": ${currentStage} ou ${Math.min(3, currentStage + 1)}
 }`;
 
-      try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-        
-        conversationHistory.push({ role: "user", parts: [{ text: userText }] });
+      // Monta histórico do diálogo para dar contexto total à IA
+      let historyText = "";
+      conversationHistory.slice(-6).forEach(m => {
+        historyText += `${m.role === 'user' ? 'Estudante' : 'Platão'}: ${m.text}
+`;
+      });
 
+      const userPromptWithContext = `DIÁLOGO SOCRÁTICO EM ANDAMENTO:
+${historyText}
+
+NOVA RESPOSTA DO ESTUDANTE (${studentName}) NA FASE ${currentStage}:
+"${userText}"
+
+Avalie filosoficamente a resposta acima e retorne o JSON com status ("AVANCAR" ou "REFINAR" ou "BLOQUEAR_ATALHO"), a tag e a sua réplica socrática.`;
+
+      try {
+        const keyToUse = GEMINI_API_KEY || localStorage.getItem('gemini_api_key');
+        if (!keyToUse) {
+          throw new Error("Chave da API não configurada. Clique em ⚙️ para inserir.");
+        }
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyToUse.trim()}`;
+        
         const bodyData = {
-          contents: conversationHistory,
-          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: userPromptWithContext }]
+            }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
           generationConfig: {
             temperature: 0.3,
             responseMimeType: "application/json"
@@ -677,7 +705,14 @@ Responda OBRIGATORIAMENTE em JSON estrito com esta estrutura:
         });
 
         if (!res.ok) {
-          throw new Error(`Erro na API Gemini: ${res.statusText}`);
+          let errorDetail = "";
+          try {
+            const errJson = await res.json();
+            errorDetail = errJson.error ? errJson.error.message : res.statusText;
+          } catch(e) {
+            errorDetail = res.statusText;
+          }
+          throw new Error(`Google API (${res.status}): ${errorDetail}`);
         }
 
         const data = await res.json();
@@ -686,13 +721,15 @@ Responda OBRIGATORIAMENTE em JSON estrito com esta estrutura:
 
         showTyping(false);
 
-        // Processa resultado da IA Real
+        // Armazena no histórico
+        conversationHistory.push({ role: 'user', text: userText });
+        conversationHistory.push({ role: 'model', text: result.resposta });
+
         let badgeType = 'refine';
         if (result.status === 'AVANCAR') badgeType = 'insight';
         if (result.status === 'BLOQUEAR_ATALHO') badgeType = 'alert';
 
         appendTutorMessage(result.resposta, badgeType, result.tag);
-        conversationHistory.push({ role: "model", parts: [{ text: result.resposta }] });
 
         if (result.status === 'AVANCAR') {
           currentStage = result.proxima_fase;
@@ -702,9 +739,21 @@ Responda OBRIGATORIAMENTE em JSON estrito com esta estrutura:
         }
 
       } catch (err) {
-        console.warn("Falha na chamada à IA real, caindo para motor semântico:", err);
+        console.error("Falha na chamada à IA real:", err);
         showTyping(false);
-        // Fallback para motor semântico local se a chave falhar
+
+        // Se for erro na chave (ex: desativada pelo Google após commit no GitHub), avisa claramente na tela!
+        if (err.message.includes('API key') || err.message.includes('Google API (400)') || err.message.includes('Google API (403)') || err.message.includes('Chave da API')) {
+          appendTutorMessage(
+            `⚠️ <strong>Aviso da Conexão com a IA Real:</strong><br>${escapeHtml(err.message)}<br><br>` +
+            `<em>Nota de Segurança:</em> Como o GitHub detectou a chave em commit público, o Google desativa chaves públicas automaticamente. ` +
+            `Gere uma nova chave gratuita no <strong>Google AI Studio</strong> e clique em <strong>⚙️</strong> no topo da página para colá-la aqui (ela ficará salva no seu celular sem ir para o GitHub)!<br><br>` +
+            `<em>Enquanto isso, acionei o motor semântico de contingência para continuar o diálogo:</em>`,
+            'alert', '⚠️ Chave da API Inválida/Revogada'
+          );
+        }
+
+        // Executa a avaliação semântica local
         evaluateLocalSemantic(userText);
       }
     }
