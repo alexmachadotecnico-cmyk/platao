@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ágora Socrática (Mobile)</title>
+  <!-- Paho MQTT client para transmissão global em tempo real -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #0a0e17;
+      --bg-card: #131b2e;
+      --bg-card-selected: #1e2a4a;
+      --border: #263352;
+      --gold: #f59e0b;
+      --gold-light: #fbbf24;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --voluntarismo: #ec4899;
+      --realismo: #3b82f6;
+      --relativismo: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      padding: 12px 0 16px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .header-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .dilemma-card {
+      background: var(--bg-card);
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1);
+    }
+
+    .quote-text {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 15.5px;
+      line-height: 1.45;
+      color: var(--gold-light);
+      text-align: center;
+    }
+
+    .quote-author {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 18px;
+      font-family: inherit;
+    }
+
+    .input-field:focus {
+      border-color: var(--gold);
+    }
+
+    /* Opções Filosóficas */
+    .options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .option-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .option-card.selected {
+      background: var(--bg-card-selected);
+    }
+
+    .option-card.voluntarismo.selected { border-color: var(--voluntarismo); }
+    .option-card.realismo.selected { border-color: var(--realismo); }
+    .option-card.relativismo.selected { border-color: var(--relativismo); }
+
+    .opt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+
+    .opt-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    textarea.input-field {
+      resize: none;
+      height: 80px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      color: #0a0e17;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+      transition: transform 0.1s;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* Tela de Feedback Socrático */
+    .feedback-screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .socratic-response-card {
+      background: var(--bg-card);
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .socratic-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .socratic-text {
+      font-size: 14.5px;
+      line-height: 1.55;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+
+    .btn-redo {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-tag">🏛️ PLATÃO &middot; EUTÍFRON 10a</div>
+    <h1>Ágora Socrática</h1>
+  </header>
+
+  <!-- FORMULÁRIO PRINCIPAL -->
+  <div id="formSection">
+    
+    <div class="dilemma-card">
+      <div class="quote-text">
+        &ldquo;O que &eacute; sagrado &eacute; amado pelos deuses porque &eacute; sagrado, ou &eacute; sagrado porque &eacute; amado pelos deuses?&rdquo;
+      </div>
+      <div class="quote-author">Sócrates a Eutífron &mdash; O Dilema da Metaética</div>
+    </div>
+
+    <div class="section-title">1. SEU NOME OU PSEUDÔNIMO FILOSÓFICO</div>
+    <input type="text" class="input-field" id="authorName" placeholder="Ex: Glaucon, Marina, Teeteto...">
+
+    <div class="section-title">2. ESCOLHA SUA CORRENTE METAÉTICA</div>
+    <div class="options-group">
+      
+      <div class="option-card voluntarismo" onclick="selectOption('voluntarismo')">
+        <div class="opt-header">
+          <span style="color: var(--voluntarismo);">Voluntarismo Moral</span>
+          <span>🏛️</span>
+        </div>
+        <div class="opt-desc">O bem &eacute; bom porque a autoridade/Deus/a lei assim o ordena. A moral deriva do poder soberano.</div>
+      </div>
+
+      <div class="option-card realismo" onclick="selectOption('realismo')">
+        <div class="opt-header">
+          <span style="color: var(--realismo);">Realismo Moral Substantivo</span>
+          <span>⚖️</span>
+        </div>
+        <div class="opt-desc">A autoridade ama o bem porque ele já é intrinsecamente justo por si mesmo. O Bem precede o poder.</div>
+      </div>
+
+      <div class="option-card relativismo" onclick="selectOption('relativismo')">
+        <div class="opt-header">
+          <span style="color: var(--relativismo);">Relativismo / Ceticismo</span>
+          <span>🌪️</span>
+        </div>
+        <div class="opt-desc">Não existe bem em si; a justiça é mera convenção cultural humana forjada no tempo histórico.</div>
+      </div>
+
+    </div>
+
+    <div class="section-title">3. SEU ARGUMENTO FILOSÓFICO (DEFENDA SUA TESE)</div>
+    <textarea class="input-field" id="argumentText" placeholder="Por que essa escolha é a mais sólida? Justifique em poucas palavras..."></textarea>
+
+    <button class="btn-submit" onclick="submitThesis()">Transmitir ao Telão da Ágora ➔</button>
+
+  </div>
+
+  <!-- TELA DE FEEDBACK SOCRÁTICO -->
+  <div class="feedback-screen" id="feedbackSection">
+    
+    <div class="success-badge">
+      ✓ Sua tese foi transmitida ao telão da sala em tempo real!
+    </div>
+
+    <div class="socratic-response-card">
+      <div class="socratic-title">
+        <span>🏺</span> Sócrates Replica ao Seu Argumento:
+      </div>
+      <div class="socratic-text" id="socraticChallenge">
+        <!-- Inserido dinamicamente -->
+      </div>
+    </div>
+
+    <button class="btn-redo" onclick="redoSubmission()">Enviar Outro Ponto de Vista</button>
+
+  </div>
+
+  <script>
+    const MQTT_TOPIC = "alexmachado_cmyk_agora_socrates_2026/teses";
+    let selectedStance = null;
+    let mqttClient = null;
+    const channel = new BroadcastChannel('agora_socrates_live');
+
+    // Conexão MQTT em Nuvem (HiveMQ Free WebSocket Broker)
+    function initMqtt() {
+      if (typeof Paho === 'undefined') return;
+
+      const clientId = "mobile_" + Math.random().toString(16).substring(2, 10);
+      mqttClient = new Paho.MQTT.Client("broker.hivemq.com", Number(8884), "/mqtt", clientId);
+
+      mqttClient.connect({
+        useSSL: true,
+        timeout: 5,
+        onSuccess: function() {
+          console.log("Smartphone conectado com sucesso à nuvem MQTT!");
+        },
+        onFailure: function(e) {
+          console.warn("Falha conexão MQTT no smartphone:", e);
+        }
+      });
+    }
+
+    function selectOption(opt) {
+      selectedStance = opt;
+      document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+      const activeEl = document.querySelector(`.option-card.${opt}`);
+      if (activeEl) activeEl.classList.add('selected');
+    }
+
+    function submitThesis() {
+      const nome = document.getElementById('authorName').value.trim() || 'Filósofo Anônimo';
+      const argumento = document.getElementById('argumentText').value.trim();
+
+      if (!selectedStance) {
+        alert('Por favor, selecione uma das três correntes metaéticas acima.');
+        return;
+      }
+
+      if (!argumento) {
+        alert('Por favor, redija uma breve justificativa para a sua tese.');
+        return;
+      }
+
+      const payload = {
+        id: 'msg_' + Date.now() + '_' + Math.random().toString(16).substr(2, 6),
+        nome: nome,
+        corrente: selectedStance,
+        argumento: argumento,
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      // 1. Transmissão em Nuvem Global via MQTT
+      if (mqttClient && mqttClient.isConnected()) {
+        try {
+          const message = new Paho.MQTT.Message(JSON.stringify(payload));
+          message.destinationName = MQTT_TOPIC;
+          mqttClient.send(message);
+          console.log("Tese transmitida com sucesso para o broker MQTT!");
+        } catch (err) {
+          console.error("Erro ao enviar via MQTT:", err);
+        }
+      } else {
+        // Se ainda não conectou, tenta enviar assim que possível
+        console.warn("MQTT desconectado no momento do envio; tentando reconectar...");
+        if (mqttClient) {
+          mqttClient.connect({
+            useSSL: true,
+            onSuccess: function() {
+              const message = new Paho.MQTT.Message(JSON.stringify(payload));
+              message.destinationName = MQTT_TOPIC;
+              mqttClient.send(message);
+            }
+          });
+        }
+      }
+
+      // 2. Transmissão Local Fallback (BroadcastChannel + LocalStorage)
+      try {
+        channel.postMessage({ type: 'NEW_THESIS', payload: payload });
+      } catch (e) {}
+
+      try {
+        let subs = [];
+        const saved = localStorage.getItem('agora_submissions');
+        if (saved) subs = JSON.parse(saved);
+        subs.unshift(payload);
+        localStorage.setItem('agora_submissions', JSON.stringify(subs));
+        localStorage.setItem('agora_submissions_trigger', Date.now());
+      } catch (e) {}
+
+      // 3. Exibe o Elenchos Socrático Individual
+      showSocraticFeedback(selectedStance);
+    }
+
+    function showSocraticFeedback(stance) {
+      let challenge = '';
+
+      if (stance === 'voluntarismo') {
+        challenge = `&ldquo;Dizes então que o bem decorre exclusivamente da vontade soberana? Mas atenta, meu caro amigo: se a autoridade decidisse amanhã que torturar inocentes é virtuoso, isso se tornaria sagrado pela simples força do decreto? Se tua consciência recusa tal absurdo, acabas de admitir que existe um padrão de justiça anterior e superior à própria autoridade!&rdquo;`;
+      } else if (stance === 'realismo') {
+        challenge = `&ldquo;Afirmas que a autoridade ama o bem porque o bem é justo em si mesmo? Muito bem: então a autoridade não tem o poder de criar o bem, apenas de reconhecê-lo. Mas dize-me: o que é esse Bem independente? Qual é a sua essência ontológica? Disseste apenas que ele é amado, mas ainda me deves a definição do que ele É.&rdquo;`;
+      } else if (stance === 'relativismo') {
+        challenge = `&ldquo;Sustentas que toda moral é mera convenção efêmera e particular? Então pergunto: essa tua afirmação pretende ser uma verdade universal sobre a condição humana, ou é apenas mais uma convenção passageira da tua época? Se pretendes que ela seja universal, contradizes teu próprio relativismo!&rdquo;`;
+      }
+
+      document.getElementById('socraticChallenge').innerHTML = challenge;
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('feedbackSection').style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function redoSubmission() {
+      document.getElementById('formSection').style.display = 'block';
+      document.getElementById('feedbackSection').style.display = 'none';
+      document.getElementById('argumentText').value = '';
+    }
+
+    window.onload = () => {
+      initMqtt();
+    };
+  </script>
+
+</body>
+</html>
