@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Platão AI — Diálogo Socrático</title>
-  <!-- Paho MQTT para sincronização global via WebSockets -->
+  <title>Platão AI — Tutor Socrático Real</title>
+  <!-- Paho MQTT para sincronização em nuvem com o telão -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,6 @@
       overflow-x: hidden;
     }
 
-    /* Canvas Confetti no topo */
     #confettiCanvas {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -49,7 +48,6 @@
       z-index: 999;
     }
 
-    /* Ambient Glow Mobile */
     .mobile-glow {
       position: fixed;
       top: -100px;
@@ -62,12 +60,12 @@
       opacity: 0.6;
     }
 
-    /* Top Bar Glassmorphism */
+    /* Top Bar */
     header {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(10, 15, 30, 0.82);
+      background: rgba(10, 15, 30, 0.88);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--card-border);
       padding: 12px 18px;
@@ -97,13 +95,31 @@
     .header-titles h1 {
       font-size: 15px;
       font-weight: 800;
-      letter-spacing: -0.3px;
       color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .header-titles p {
       font-size: 11px;
       color: var(--text-muted);
+    }
+
+    .ai-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(6, 182, 212, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .badge-stage {
@@ -118,11 +134,21 @@
       transition: all 0.3s;
     }
 
+    .btn-key {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
     /* Modal de Boas-Vindas */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(3, 7, 18, 0.95);
+      background: rgba(3, 7, 18, 0.96);
       backdrop-filter: blur(16px);
       display: flex;
       align-items: center;
@@ -132,16 +158,16 @@
     }
 
     .modal-card {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.9);
       border: 1px solid rgba(245, 158, 11, 0.4);
       border-radius: 24px;
-      padding: 30px 22px;
-      max-width: 360px;
+      padding: 28px 22px;
+      max-width: 370px;
       width: 100%;
       text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 15px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
       animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -168,19 +194,35 @@
     .name-input {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 13px;
       color: var(--text);
-      font-size: 15px;
+      font-size: 14.5px;
       outline: none;
       text-align: center;
       font-family: inherit;
-      transition: all 0.2s;
     }
 
     .name-input:focus {
       border-color: var(--gold);
       box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .api-key-input {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--card-border);
+      border-radius: 10px;
+      padding: 10px;
+      color: #94a3b8;
+      font-size: 12px;
+      outline: none;
+      text-align: center;
+      font-family: monospace;
+    }
+
+    .api-key-input:focus {
+      border-color: #38bdf8;
+      color: white;
     }
 
     .btn-enter {
@@ -193,7 +235,6 @@
       border-radius: 14px;
       cursor: pointer;
       box-shadow: 0 0 25px var(--gold-glow);
-      transition: transform 0.2s;
     }
 
     .btn-enter:active { transform: scale(0.97); }
@@ -272,7 +313,7 @@
       box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
     }
 
-    /* Badges de Feedback Pedagógico no Chat */
+    /* Badges de Feedback Pedagógico */
     .eval-pill {
       display: inline-flex;
       align-items: center;
@@ -341,7 +382,7 @@
       40% { transform: translateY(-6px); }
     }
 
-    /* Input Bar Futurista Glassmorphism */
+    /* Input Dock */
     .input-dock {
       position: fixed;
       bottom: 0;
@@ -365,7 +406,6 @@
       font-size: 15px;
       outline: none;
       font-family: inherit;
-      transition: all 0.25s;
     }
 
     .text-box:focus {
@@ -387,7 +427,6 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 0 20px var(--gold-glow);
-      transition: transform 0.15s;
     }
 
     .btn-send:active { transform: scale(0.94); }
@@ -403,8 +442,12 @@
     <div class="modal-card">
       <div style="font-size: 42px;">🏛️</div>
       <h2>Entrar na Caverna de Platão</h2>
-      <p>Você terá um diálogo socrático individual com Platão. Suas teses serão avaliadas em tempo real e projetadas na aula.</p>
+      <p>Você terá um diálogo socrático individual com a inteligência artificial de Platão. O modelo avaliará a solidez filosófica do seu raciocínio a cada etapa.</p>
+      
       <input type="text" class="name-input" id="studentNameInput" placeholder="Seu nome ou pseudônimo...">
+      
+      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Chave Gemini API (Opcional se já configurada)">
+
       <button class="btn-enter" onclick="startSession()">Entrar no Diálogo</button>
     </div>
   </div>
@@ -414,11 +457,14 @@
     <div class="header-info">
       <div class="avatar-icon">🏛️</div>
       <div class="header-titles">
-        <h1 id="headerStudentName">Platão (Tutor AI)</h1>
+        <h1 id="headerStudentName">Platão <span class="ai-badge">IA REAL</span></h1>
         <p>Alegoria da Caverna &middot; Rep. VII</p>
       </div>
     </div>
-    <div class="badge-stage" id="stageBadge">Fase 1: Sombras</div>
+    <div class="header-right">
+      <div class="badge-stage" id="stageBadge">Fase 1: Sombras</div>
+      <button class="btn-key" onclick="promptApiKey()" title="Configurar Chave de IA">⚙️</button>
+    </div>
   </header>
 
   <!-- Chat Stream -->
@@ -433,7 +479,7 @@
       <div class="w-dot"></div>
       <div class="w-dot"></div>
     </div>
-    <span>Platão avalia sua tese...</span>
+    <span id="typingLabel">Platão examina seu argumento filosoficamente...</span>
   </div>
 
   <!-- Input Dock -->
@@ -443,12 +489,23 @@
   </div>
 
   <script>
+    // ========================================================
+    // CONFIGURAÇÃO DA IA REAL (GOOGLE GEMINI API)
+    // ========================================================
+    // Se você colar sua chave do Gemini aqui, nenhum aluno precisará digitar nada!
+    let GEMINI_API_KEY = "AQ.Ab8RN6JtXHbmsTc-feqOaaiMU7jJHznTw8MZGXLI1O0ukGtKmg"; 
+    
+    // Tópico MQTT para projetar no telão
     const MQTT_TOPIC = "alexmachado_platao_caverna_2026/feed";
+
     let studentName = "Estudante";
     let studentId = "std_" + Math.random().toString(16).substring(2, 9);
-    let currentStage = 1;
+    let currentStage = 1; // 1: Sombras, 2: Fogo/Subida, 3: O Sol
     let mqttClient = null;
     const channel = new BroadcastChannel('platao_caverna_live');
+
+    // Histórico de conversa para a IA manter a memória
+    let conversationHistory = [];
 
     function initMqtt() {
       if (typeof Paho === 'undefined') return;
@@ -462,6 +519,16 @@
       });
     }
 
+    function promptApiKey() {
+      const current = localStorage.getItem('gemini_api_key') || GEMINI_API_KEY;
+      const key = prompt("Insira a chave da Google Gemini API (ou deixe em branco para o motor semântico):", current);
+      if (key !== null) {
+        GEMINI_API_KEY = key.trim();
+        localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
+        alert(GEMINI_API_KEY ? "Chave da IA configurada com sucesso!" : "Modo semântico local ativado.");
+      }
+    }
+
     function startSession() {
       const input = document.getElementById('studentNameInput').value.trim();
       if (!input) {
@@ -469,17 +536,29 @@
         return;
       }
       studentName = input;
+
+      const customKey = document.getElementById('apiKeyInput').value.trim();
+      if (customKey) {
+        GEMINI_API_KEY = customKey;
+        localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
+      } else {
+        const saved = localStorage.getItem('gemini_api_key');
+        if (saved) GEMINI_API_KEY = saved;
+      }
+
       document.getElementById('nameModal').style.display = 'none';
-      document.getElementById('headerStudentName').textContent = `Diálogo com ${studentName}`;
+      document.getElementById('headerStudentName').innerHTML = `Diálogo com ${escapeHtml(studentName)} <span class="ai-badge">${GEMINI_API_KEY ? 'GEMINI AI' : 'IA LOCAL'}</span>`;
 
       broadcastToProjection("", 1);
 
+      const openingQuestion = 
+        `Saudações, <strong>${escapeHtml(studentName)}</strong>!<br><br>` +
+        `Imagine prisioneiros que vivem desde a infância encadeados no fundo de uma caverna escura, imobilizados pelo pescoço e pernas, de modo a contemplarem unicamente a parede de rocha à sua frente. Atrás deles queima uma fogueira, e entre eles e o fogo passam homens erguendo estátuas de madeira e pedra que projetam sombras na parede.<br><br>` +
+        `Se esses prisioneiros <strong>nunca viram ou experimentaram nada além disso durante toda a vida</strong>, me diga com suas próprias palavras: o que eles considerariam como a <em>verdadeira realidade</em>?`;
+
       setTimeout(() => {
-        appendTutorMessage(
-          `Saudações, <strong>${escapeHtml(studentName)}</strong>!<br><br>` +
-          `Imagine prisioneiros que vivem desde a infância encadeados no fundo de uma caverna escura, imobilizados pelo pescoço e pernas, de modo a contemplarem unicamente a parede de rocha à sua frente. Atrás deles queima uma fogueira, e entre eles e o fogo passam homens erguendo estátuas de madeira e pedra que projetam sombras na parede.<br><br>` +
-          `Se esses prisioneiros <strong>nunca viram ou experimentaram nada além disso durante toda a vida</strong>, me diga com suas próprias palavras: o que eles considerariam como a <em>verdadeira realidade</em>?`
-        );
+        appendTutorMessage(openingQuestion);
+        conversationHistory.push({ role: "model", parts: [{ text: openingQuestion.replace(/<[^>]*>/g, '') }] });
       }, 350);
     }
 
@@ -516,19 +595,15 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    function showTyping(callback) {
+    function showTyping(show, label = "Platão examina seu argumento filosoficamente...") {
       const indicator = document.getElementById('typingIndicator');
-      indicator.style.display = 'flex';
+      document.getElementById('typingLabel').textContent = label;
+      indicator.style.display = show ? 'flex' : 'none';
       const container = document.getElementById('chatStream');
       container.scrollTop = container.scrollHeight;
-
-      setTimeout(() => {
-        indicator.style.display = 'none';
-        callback();
-      }, 950);
     }
 
-    function sendUserMessage() {
+    async function sendUserMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
@@ -536,106 +611,212 @@
       appendUserMessage(text);
       input.value = '';
 
-      showTyping(() => {
-        evaluateAndRespond(text);
-      });
+      showTyping(true);
+
+      if (GEMINI_API_KEY) {
+        // Rota 1: IA Real Externa via Google Gemini
+        await callRealGeminiAI(text);
+      } else {
+        // Rota 2: Motor Semântico Local Rigoroso
+        setTimeout(() => {
+          evaluateLocalSemantic(text);
+          showTyping(false);
+        }, 900);
+      }
     }
 
-    // MOTOR DE AVALIAÇÃO PEDAGÓGICA (HARVARD MODEL)
-    function evaluateAndRespond(text) {
-      const lower = text.toLowerCase();
+    // ========================================================
+    // CHAMADA À IA REAL (GOOGLE GEMINI API)
+    // ========================================================
+    async function callRealGeminiAI(userText) {
+      const systemPrompt = `Você é Platão, filósofo clássico, atuando como um tutor socrático acadêmico rigoroso para estudantes de graduação em Filosofia na discussão da Alegoria da Caverna (República, Livro VII).
 
-      // Tentativa de atalhos e pedidos de respostas prontas
-      if (lower.includes('resumo') || lower.includes('moral da história') || lower.includes('resposta pronta') || lower.includes('me dá a resposta') || lower.includes('o que significa') || lower.includes('explica logo') || lower.includes('gabarito')) {
+O aluno está atualmente na FASE ${currentStage} de 3:
+- Fase 1: As Sombras no Fundo da Caverna (Doxa - aparências sensíveis tomadas como realidade absoluta).
+- Fase 2: O Fogo e a Subida Íngreme (Dissonância cognitiva, choque da luz nos olhos que dói e cega temporariamente, o sofrimento de desconstruir certezas).
+- Fase 3: A Luz do Sol e a Katábasis (Noesis - a Ideia do Bem e o dever moral/político inegociável do filósofo de retornar à caverna para emancipar a comunidade, arriscando a própria vida).
+
+SUAS REGRAS PEDAGÓGICAS E DE AVALIAÇÃO:
+1. Responda em tom socrático, polido, culto e provocador. NUNCA dê resumos prontos. Se o aluno pedir resposta pronta, recuse com status "BLOQUEAR_ATALHO".
+2. VALIDAÇÃO REAL: O aluno SÓ pode avançar (status "AVANCAR") se o argumento dele demonstrar GENUÍNA compreensão conceitual da Fase ${currentStage}.
+   - Na Fase 1: Deve reconhecer que eles tomam as sombras/o que veem como a realidade plena porque não têm outro padrão de comparação, ou conectar com aparências/senso comum. Se achar que eles "são burros" ou que "já sabiam que era falso", reprove com status "REFINAR".
+   - Na Fase 2: Deve reconhecer que a luz ardente da fogueira CEGA, DÓI e MACHUCA os olhos, e que sair da ignorância causa dor psicológica. Se disser que "nada acontece" ou que ele "fica feliz imediatamente", reprove enfaticamente com status "REFINAR".
+   - Na Fase 3: Deve reconhecer o dever ético/político de RETORNAR à caverna (katábasis) para libertar os outros. Se defender egoísmo (ficar no sol), reprove com status "REFINAR". Se for texto desconexo ("me de res s", etc.), reprove com status "REFINAR".
+3. Se aprovar o avanço ("AVANCAR"): formule a próxima pergunta da fase seguinte (se Fase 1 -> pergunte sobre o fogo e a dor nos olhos; se Fase 2 -> pergunte sobre o sol e o dever de retornar; se Fase 3 -> conclua com honras).
+4. CONDUÇÃO ATIVA COM ANDAIMES (SCAFFOLDING - status "REFINAR"): Se o aluno errar ou der resposta incompleta, NUNCA dê a resposta de mão beijada, mas NUNCA o abandone com um simples "está errado". Atue como um verdadeiro tutor de Harvard:
+   - Acolha o esforço com incentivo socrático (Growth Mindset).
+   - Aponte a limitação do argumento atual.
+   - Forneça um ANDAIME PEDAGÓGICO: uma pista analógica do cotidiano, um experimento mental simples ou uma pergunta intermediária menor que reduza a carga cognitiva e ajude o aluno a descobrir por si mesmo a resposta correta para avançar!
+
+Responda OBRIGATORIAMENTE em JSON estrito com esta estrutura:
+{
+  "status": "AVANCAR" | "REFINAR" | "BLOQUEAR_ATALHO",
+  "tag": "TESE VALIDADA COM DISTINÇÃO" | "RACIOCÍNIO A REFINAR" | "ATALHO BLOQUEADO",
+  "resposta": "Sua fala socrática para o estudante...",
+  "proxima_fase": ${currentStage} ou ${Math.min(3, currentStage + 1)}
+}`;
+
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        
+        conversationHistory.push({ role: "user", parts: [{ text: userText }] });
+
+        const bodyData = {
+          contents: conversationHistory,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            temperature: 0.3,
+            responseMimeType: "application/json"
+          }
+        };
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData)
+        });
+
+        if (!res.ok) {
+          throw new Error(`Erro na API Gemini: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        const jsonText = data.candidates[0].content.parts[0].text;
+        const result = JSON.parse(jsonText);
+
+        showTyping(false);
+
+        // Processa resultado da IA Real
+        let badgeType = 'refine';
+        if (result.status === 'AVANCAR') badgeType = 'insight';
+        if (result.status === 'BLOQUEAR_ATALHO') badgeType = 'alert';
+
+        appendTutorMessage(result.resposta, badgeType, result.tag);
+        conversationHistory.push({ role: "model", parts: [{ text: result.resposta }] });
+
+        if (result.status === 'AVANCAR') {
+          currentStage = result.proxima_fase;
+          updateStageUI(currentStage === 2 ? 'Fase 2: O Fogo e a Subida' : 'Fase 3: A Luz do Sol');
+          broadcastToProjection(userText, currentStage);
+          if (currentStage === 3) triggerConfetti();
+        }
+
+      } catch (err) {
+        console.warn("Falha na chamada à IA real, caindo para motor semântico:", err);
+        showTyping(false);
+        // Fallback para motor semântico local se a chave falhar
+        evaluateLocalSemantic(userText);
+      }
+    }
+
+    // ========================================================
+    // MOTOR SEMÂNTICO LOCAL RIGOROSO (FALLBACK SEM CHAVE)
+    // ========================================================
+    function normalizeText(t) {
+      return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    function evaluateLocalSemantic(text) {
+      const clean = normalizeText(text);
+
+      if (clean.includes('resumo') || clean.includes('moral da historia') || clean.includes('resposta pronta') || clean.includes('me da a resposta') || clean.includes('o que significa') || clean.includes('explica logo')) {
         appendTutorMessage(
-          `Ah, meu caro <strong>${escapeHtml(studentName)}</strong>! Se eu lhe entregar um resumo pronto ou uma fórmula de Platão, estarei agindo exatamente como aqueles homens que manipulam estátuas: projetando mais uma sombra sobre você! 💡<br><br>` +
-          `A filosofia exige o exame de si mesmo. Diga-me: <strong>o que na sua própria realidade cotidiana funciona exatamente como as sombras e os ecos da parede da caverna?</strong>`,
-          'alert', '🔒 Atalho Bloqueado'
+          `Ah, meu caro <strong>${escapeHtml(studentName)}</strong>! Se eu lhe entregar um resumo pronto de Platão, estarei agindo exatamente como aqueles homens que manipulam estátuas: projetando mais uma sombra sobre você! 💡<br><br>` +
+          `A tutoria socrática exige o exame crítico. Diga-me com suas próprias palavras: <strong>o que na sua realidade funciona exatamente como as sombras projetadas na parede?</strong>`,
+          'alert', '🔒 Tentativa de Atalho Bloqueada'
         );
         return;
       }
 
-      // FASE 1: AS SOMBRAS NO FUNDO DA CAVERNA (DOXA)
-      if (currentStage === 1) {
-        if (lower.includes('burro') || lower.includes('idiota') || lower.includes('tolo') || lower.includes('ignorante') && !lower.includes('estrutura')) {
-          appendTutorMessage(
-            `Cuidado com essa conclusão precipitada! Os homens da caverna estão acorrentados <em>desde a infância</em>, sem qualquer alternativa. Eles não são tolos; são reféns de uma estrutura que moldou sua percepção.<br><br>` +
-            `Pense bem: se alguém nunca teve acesso a outro mundo além de uma tela desde o nascimento, como poderia desconfiar dela? <strong>Tente reformular: por que a mente humana tende a aceitar as aparências sem suspeitar de nada?</strong>`,
-            'refine', '⚠️ Ponto a Refinar'
-          );
-          return;
-        }
+      if (clean.length < 5 || clean.split(/\s+/).length < 2) {
+        appendTutorMessage(
+          `Sua resposta foi muito breve ou telegráfica para um exame filosófico! Diga-me com mais clareza e substância o que você pensa a respeito.`,
+          'refine', '⚠️ Resposta Muito Breve'
+        );
+        return;
+      }
 
-        if (lower.includes('desconfia') || lower.includes('sabem que é falso') || lower.includes('duvidar')) {
+      if (currentStage === 1) {
+        if (clean.includes('desconfia') || clean.includes('sabem que e falso') || clean.includes('duvidam')) {
           appendTutorMessage(
-            `Reflita com rigor ontológico: com base em quê eles desconfiariam? Se você nunca viu o objeto real, nem a fogueira, nem a si mesmo, a sombra não parece uma cópia; <strong>ela é o único original que existe</strong>.<br><br>` +
-            `Como é possível duvidar de algo quando não se tem nenhum padrão de comparação? Tente responder novamente considerando esse limite dos sentidos.`,
+            `Reflita com rigor ontológico: <strong>com base em quê eles poderiam desconfiar?</strong> Se você nunca viu o objeto real, nem a fogueira, nem o mundo exterior, a sombra na parede não parece uma cópia; <em>ela é o único original que existe</em>.<br><br>` +
+            `Como é possível duvidar sem ter nenhum padrão de comparação prévio? Tente reformular considerando esse limite dos sentidos.`,
             'refine', '⚠️ Equívoco Epistemológico'
           );
           return;
         }
 
-        if (text.length < 10) {
+        const acerto1 = ['sombra', 'vendo', 'caverna', 'parede', 'aparenc', 'ilus', 'doxa', 'realidade', 'verdade', 'tudo o que', 'unica', 'imagem', 'senso comum', 'o que estao vendo', 'o que veem'].some(w => clean.includes(w));
+
+        if (acerto1) {
+          currentStage = 2;
+          updateStageUI('Fase 2: O Fogo e a Subida');
+          broadcastToProjection(text, 2);
           appendTutorMessage(
-            `Sua resposta foi muito breve para a gravidade do tema! Diga-me com mais detalhes: <strong>o que na nossa sociedade contemporânea desempenha exatamente o papel dessas sombras na parede?</strong>`,
-            'refine', '💬 Aprofunde seu Argumento'
+            `<strong>Perfeita compreensão!</strong> Você tocou no coração do conceito platônico de <em>Doxa</em> (opinião acrítica): para quem está encadeado aos sentidos, as aparências e as narrativas na parede são tomadas como a verdade absoluta.<br><br>` +
+            `Agora, façamos a transição: imagine que alguém quebra os grilhões desse prisioneiro e o força bruscamente a se levantar, virar o pescoço e olhar diretamente para a chama ardente da fogueira.<br><br>` +
+            `<strong>Como os olhos dele reagem à luz do fogo após uma vida inteira nas trevas? Por que o rompimento com as velhas certezas causa tanto incômodo e sofrimento ao ser humano?</strong>`,
+            'insight', '✓ Tese Validada com Distinção'
           );
-          return;
+        } else {
+          appendTutorMessage(
+            `Você tocou no tema, mas não respondeu à questão central: <strong>para quem nasceu imobilizado no escuro, o que é tomado como a realidade soberana?</strong> E o que essas sombras simbolizam no nosso cotidiano?`,
+            'refine', '💬 Aprofunde a Resposta'
+          );
         }
-
-        // Resposta Correta: Avança para Fase 2
-        currentStage = 2;
-        updateStageUI('Fase 2: O Fogo e a Subida');
-        broadcastToProjection(text, 2);
-
-        appendTutorMessage(
-          `<strong>Perfeita compreensão!</strong> Você tocou no coração do conceito platônico de <em>Doxa</em> (opinião acrítica): para quem está encadeado aos sentidos, as aparências e narrativas são tomadas como a verdade absoluta.<br><br>` +
-          `Agora, façamos a transição: imagine que alguém quebra os grilhões desse prisioneiro e o força bruscamente a se levantar, virar o pescoço e olhar diretamente para a chama ardente da fogueira.<br><br>` +
-          `<strong>Como os olhos dele reagem à luz do fogo após uma vida inteira nas trevas? Por que o rompimento com as velhas certezas causa tanto incômodo e sofrimento ao ser humano?</strong>`,
-          'insight', '✓ Tese Validada com Distinção'
-        );
       }
-
-      // FASE 2: O FOGO E A SUBIDA ÍNGREME
       else if (currentStage === 2) {
-        if (lower.includes('feliz') || lower.includes('alegre') || lower.includes('alívio') || lower.includes('agradece')) {
+        const erro2 = ['nada acontece', 'nao acontece nada', 'nada', 'enxerga bem', 'fica feliz', 'alegre', 'tranquilo', 'nao doi', 'nao machuca', 'normal'].some(w => clean.includes(w));
+
+        if (erro2) {
           appendTutorMessage(
-            `Será mesmo? Imagine alguém que passou 20 anos na escuridão absoluta sendo forçado a encarar uma labareda de fogo ardente. O corpo não agradece: os olhos ardem, a visão fica embaçada e o primeiro impulso é <strong>voltar correndo para a segurança da sombra</strong>!<br><br>` +
-            `Por que o processo de aprender e questionar nossas crenças mais íntimas gera tanta resistência e dor psicológica? Tente aprofundar essa contradição.`,
-            'refine', '⚠️ Ponto Cego Psicológico'
+            `Reflita com cuidado sobre a experiência física e psicológica! Imagine alguém que passou 20 anos na escuridão absoluta sendo forçado subitamente a olhar para uma fogueira ardente.<br><br>` +
+            `<strong>Seus olhos não ficam normais: eles doem intensamente, ardem e ficam cegos pelo ofuscamento!</strong><br><br>` +
+            `Platão usa essa dor para mostrar que aprender dói: questionar nossas certezas mais antigas causa uma verdadeira angústia. <strong>Como você explicaria essa dor de quem é arrancado do conforto da ignorância?</strong>`,
+            'refine', '⚠️ Equívoco Conceitual'
           );
           return;
         }
 
-        if (text.length < 10) {
+        const acerto2 = ['doi', 'machuca', 'cega', 'ofusca', 'arde', 'ardor', 'dor', 'dificil', 'desconfort', 'incomod', 'queima', 'ruim', 'resiste', 'sofr', 'esforco', 'dissonanc', 'perturba'].some(w => clean.includes(w));
+
+        if (acerto2) {
+          currentStage = 3;
+          updateStageUI('Fase 3: A Luz do Sol');
+          broadcastToProjection(text, 3);
+          triggerConfetti();
+
           appendTutorMessage(
-            `Dê um passo além: não se limite a dizer que dói. <strong>Por que abandonar uma mentira confortável é mais difícil do que continuar nela?</strong>`,
-            'refine', '💬 Aprofunde a Reflexão'
+            `<strong>Raciocínio primoroso!</strong> Você compreendeu que a filosofia não é um passeio suave, mas uma ruptura dolorosa. A luz cega temporariamente; a desconstrução das ilusões causa o que hoje chamamos de dissonância cognitiva.<br><br>` +
+            `O prisioneiro é arrastado pela subida íngreme para fora da caverna. Pouco a pouco, seus olhos se habituam e ele contempla o próprio <strong>Sol</strong> — que para Platão representa a <em>Ideia do Bem</em>, causa de toda a inteligibilidade e verdade.<br><br>` +
+            `Agora chegamos à questão ética e política definitiva da <em>República</em>: <strong>Após contemplar a verdade suprema sob o sol, o filósofo deve viver isolado desfrutando da luz, ou tem a obrigação moral de descer de volta à escuridão da caverna para tentar libertar os outros prisioneiros?</strong>`,
+            'insight', '✓ Transição Epistêmica Validada'
           );
-          return;
+        } else {
+          appendTutorMessage(
+            `Você não abordou a pergunta central: <strong>o que acontece concretamente com a visão do prisioneiro ao encarar o fogo?</strong> Ele enxerga com clareza ou seus olhos sofrem com o ofuscamento da luz? Por que romper com preconceitos é doloroso?`,
+            'refine', '💬 Refine a Reflexão'
+          );
         }
-
-        // Resposta Correta: Avança para Fase 3
-        currentStage = 3;
-        updateStageUI('Fase 3: A Luz do Sol');
-        broadcastToProjection(text, 3);
-        triggerConfetti();
-
-        appendTutorMessage(
-          `<strong>Raciocínio primoroso!</strong> Você compreendeu que a filosofia não é um passeio suave, mas uma ruptura dolorosa. A luz cega temporariamente; a desconstrução das ilusões causa o que hoje chamamos de dissonância cognitiva.<br><br>` +
-          `O prisioneiro é arrastado pela subida íngreme para fora da caverna. Pouco a pouco, seus olhos se habituam e ele contempla o próprio <strong>Sol</strong> — que para Platão representa a <em>Ideia do Bem</em>, causa de toda a inteligibilidade e verdade.<br><br>` +
-          `Agora chegamos à questão ética e política definitiva da <em>República</em>: <strong>Após contemplar a verdade suprema sob o sol, o filósofo deve viver isolado desfrutando da luz, ou tem a obrigação moral de descer de volta à escuridão da caverna para tentar libertar os outros prisioneiros?</strong>`,
-          'insight', '✓ Transição Epistêmica Validada'
-        );
       }
-
-      // FASE 3: O DEVER POLÍTICO/ÉTICO DO RETORNO (KATÁBASIS)
       else if (currentStage === 3) {
-        if (lower.includes('ficar') || lower.includes('não deve voltar') || lower.includes('deixa pra lá') || lower.includes('egoísta')) {
+        const erro3 = ['ficar', 'nao voltar', 'nao deve voltar', 'fica la', 'sozinho', 'curtir', 'deixa pra la', 'azar deles', 'permanecer'].some(w => clean.includes(w));
+
+        if (erro3) {
           appendTutorMessage(
-            `Essa é uma tentação compreensível, mas Platão discorda veementemente! Se o sábio se isola em sua torre de marfim, quem governará a cidade serão os homens ignorantes manipulados por sombras.<br><br>` +
-            `Para Platão, a justiça não é privilégio individual: o filósofo tem uma dívida para com a pólis que o formou. <strong>Mesmo sabendo que os prisioneiros podem ridicularizá-lo ou até matá-lo, por que o retorno à caverna (a <em>katábasis</em>) é um dever ético inegociável?</strong>`,
-            'refine', '⚠️ Desafio Político'
+            `Essa é uma tentação compreensível, mas Platão discorda veementemente! Se o homem iluminado se isolar no topo da montanha, quem continuará governando a cidade serão os ignorantes manipulados por sombras.<br><br>` +
+            `Para Platão, o conhecimento impõe uma dívida ética com a pólis: o filósofo tem a obrigação de governar e libertar a comunidade. <strong>Mesmo sabendo que os prisioneiros podem zombar dele ou tentar matá-lo, por que o retorno à caverna (a <em>katábasis</em>) é um dever inegociável?</strong>`,
+            'refine', '⚠️ Desafio de Filosofia Política'
+          );
+          return;
+        }
+
+        const acerto3 = ['volt', 'retorn', 'desc', 'ajud', 'libert', 'dev', 'obrig', 'ensin', 'socied', 'polis', 'etic', 'moral', 'outr', 'salv', 'compartilh'].some(w => clean.includes(w));
+
+        if (!acerto3) {
+          appendTutorMessage(
+            `Sua resposta não foi compreensível ou não respondeu ao dilema ético! Diga claramente: <strong>o filósofo deve permanecer isolado no topo contemplando o Sol ou tem a obrigação moral de descer de volta à escuridão da caverna para libertar seus companheiros?</strong>`,
+            'refine', '⚠️ Resposta Desconexa ou Vaga'
           );
           return;
         }
@@ -698,7 +879,6 @@
       return d.innerHTML;
     }
 
-    // Efeito Confete Visual quando alcança a Luz do Sol
     function triggerConfetti() {
       const canvas = document.getElementById('confettiCanvas');
       const ctx = canvas.getContext('2d');
